@@ -62,6 +62,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
 @synthesize movieWriterContext = _movieWriterContext;
 
 @synthesize delegate = _delegate;
+static BOOL allowWriteAudio = NO;
 
 #pragma mark -
 #pragma mark Initialization and teardown
@@ -275,6 +276,8 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
         }
     });
     isRecording = YES;
+    allowWriteAudio = NO;
+
 	//    [assetWriter startSessionAtSourceTime:kCMTimeZero];
 }
 
@@ -362,6 +365,9 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
 
 - (void)processAudioBuffer:(CMSampleBufferRef)audioBuffer;
 {
+    if (!allowWriteAudio) {
+        return;
+      }
     if (!isRecording)
     {
         return;
@@ -746,6 +752,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
             {
                 if (![assetWriterPixelBufferInput appendPixelBuffer:pixel_buffer withPresentationTime:frameTime])
                     NSLog(@"Problem appending pixel buffer at time: %@", CFBridgingRelease(CMTimeCopyDescription(kCFAllocatorDefault, frameTime)));
+                allowWriteAudio = YES;
             }
             else
             {

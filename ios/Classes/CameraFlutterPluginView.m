@@ -34,6 +34,10 @@
 @property (nonatomic, assign) BOOL isOpenBeauty;
 // 选择的滤镜类型
 @property (nonatomic, copy) NSString *selectFilterType;
+// 是否修改过视频储存路径
+@property (nonatomic, assign) BOOL isSetMoviePath;
+// 是否修改过图片储存路径
+@property (nonatomic, assign) BOOL isSetPicPath;
 
 @end
  
@@ -89,6 +93,8 @@
     self.selectFilterType = 0;
     self.isOpenBeauty = YES;
     self.selectFilterType = @"原图";
+    self.isSetMoviePath = NO;
+    self.isSetPicPath = NO;
 
     self.pathToMovie = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:[NSString stringWithFormat:@"BeautyCamMovie%ld.mp4", (long)[[NSDate date] timeIntervalSince1970]]];
     self.pathToPic = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:[NSString stringWithFormat:@"BeautyCamPic%ld.png", (long)[[NSDate date] timeIntervalSince1970]]];
@@ -98,8 +104,9 @@
     [self.nativeView addSubview:self.gpuImageView];
     
     // videoCamera
-    self.gpuVideoCamera = [[GPUImageStillCamera alloc] initWithSessionPreset:AVCaptureSessionPreset1280x720 cameraPosition:AVCaptureDevicePositionBack];
+    self.gpuVideoCamera = [[GPUImageStillCamera alloc] initWithSessionPreset:AVCaptureSessionPreset3840x2160 cameraPosition:AVCaptureDevicePositionBack];
     [self.gpuVideoCamera addAudioInputsAndOutputs];
+    self.gpuVideoCamera.jpegCompressionQuality = 1;
     
     // GPUImageView填充模式
     self.gpuImageView.fillMode = kGPUImageFillModePreserveAspectRatioAndFill;
@@ -221,6 +228,12 @@
 // 拍照
 - (void)takePictureWithResult:(FlutterResult)result {
     __block CameraFlutterPluginView *weakSelfView = self;
+    
+    if (self.isSetPicPath) {
+        self.pathToPic = self.pathToPic;
+    }else {
+        self.pathToPic = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:[NSString stringWithFormat:@"BeautyCamPic%ld.png", (long)[[NSDate date] timeIntervalSince1970]]];
+    }
     [self.gpuVideoCamera capturePhotoAsImageProcessedUpToFilter:_imagefilter withCompletionHandler:^(UIImage *processedImage, NSError *error) {
         if(error){
             NSLog(@"error --- %@", error);
@@ -250,11 +263,6 @@
 
 // 结束拍摄
 - (void)endVideoWithResult:(FlutterResult)result {
-//    [self.movieWriter finishRecording];
-//    [self.gpuVideoCamera useNextFrameForImageCapture];
-//    //获取当前数据流的图像，
-//    UIImage *processedImage = [self.gpuVideoCamera imageFromCurrentFramebuffer];
-//    // processedImage 为获取图片
     
     [_imagefilter removeTarget:self.movieWriter];
     self.gpuVideoCamera.audioEncodingTarget = nil;
@@ -308,11 +316,13 @@
 // 设置视频储存路径
 - (void)setOuputMP4File:(NSString *)path {
     self.pathToMovie = path;
+    self.isSetMoviePath = YES;
 }
 
 // 设置图片储存路径
 - (void)setOuputPicFile:(NSString *)path {
     self.pathToPic = path;
+    self.isSetPicPath = YES;
 }
 #pragma mark -
 
