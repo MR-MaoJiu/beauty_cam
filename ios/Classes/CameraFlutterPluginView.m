@@ -6,7 +6,7 @@
 //
 #import "CameraFlutterPluginView.h"
 #import "GPUImage.h"
-
+#import <AVFoundation/AVCaptureDevice.h>
 
 @interface CameraFlutterPluginView ()
 /** channel*/
@@ -79,11 +79,35 @@
     self.nativeView = [[UIView alloc] initWithFrame:_frame];
     self.nativeView.backgroundColor = [UIColor blackColor];
     
-    __block CameraFlutterPluginView *weakSelfView = self;
-    dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC));
-    dispatch_after(delayTime, dispatch_get_main_queue(), ^{
-        [weakSelfView initCamera];
-    });
+
+    AVAuthorizationStatus videoStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
+    if(videoStatus == AVAuthorizationStatusAuthorized){
+        __weak __typeof__(self) weakSelf = self;
+        dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC));
+        dispatch_after(delayTime, dispatch_get_main_queue(), ^{
+            [weakSelf initCamera];
+        });
+    }else {
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"请开启照相机权限" message:@"打开后可拍摄照片和视频" preferredStyle:UIAlertControllerStyleAlert];
+        NSString *cancel = @"取消";
+        NSString *confirm = @"去开启";
+        [alertController addAction:[UIAlertAction actionWithTitle:cancel style:UIAlertActionStyleCancel handler:^(UIAlertAction *_Nonnull action) {
+        }]];
+        [alertController addAction:[UIAlertAction actionWithTitle:confirm style:UIAlertActionStyleDefault handler:^(UIAlertAction *_Nonnull action) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSURL *url = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+                if ([[UIApplication sharedApplication] canOpenURL:url]) {
+                    [[UIApplication sharedApplication] openURL:url options:[NSDictionary dictionary] completionHandler:^(BOOL success) {
+                    }];
+                }
+            });
+            
+        }]];
+        alertController.modalPresentationStyle = UIModalPresentationFullScreen;
+        
+        FlutterAppDelegate *appDelegate = (FlutterAppDelegate *)[UIApplication sharedApplication].delegate;
+        [appDelegate.window.rootViewController presentViewController:alertController animated:YES completion:nil];
+    }
     
     return self.nativeView;
     
@@ -104,7 +128,7 @@
     [self.nativeView addSubview:self.gpuImageView];
     
     // videoCamera
-    self.gpuVideoCamera = [[GPUImageStillCamera alloc] initWithSessionPreset:AVCaptureSessionPreset3840x2160 cameraPosition:AVCaptureDevicePositionBack];
+    self.gpuVideoCamera = [[GPUImageStillCamera alloc] initWithSessionPreset:AVCaptureSessionPresetHigh cameraPosition:AVCaptureDevicePositionBack];
     [self.gpuVideoCamera addAudioInputsAndOutputs];
     self.gpuVideoCamera.jpegCompressionQuality = 1;
     
@@ -118,10 +142,10 @@
     // 默认开启美颜
     [self enableBeauty:@"1"];
     
-    __block CameraFlutterPluginView *weakSelfView = self;
+    __weak __typeof__(self) weakSelf = self;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         //Start camera capturing, 里面封装的是AVFoundation的session的startRunning
-        [weakSelfView.gpuVideoCamera startCameraCapture];
+        [weakSelf.gpuVideoCamera startCameraCapture];
     });
     
 }
@@ -227,8 +251,8 @@
 
 // 拍照
 - (void)takePictureWithResult:(FlutterResult)result {
-    __block CameraFlutterPluginView *weakSelfView = self;
-    
+    __weak __typeof__(self) weakSelf = self;
+
     if (self.isSetPicPath) {
         self.pathToPic = self.pathToPic;
     }else {
@@ -241,10 +265,10 @@
         }
         // 写入指定路径
         NSData *data = UIImagePNGRepresentation(processedImage);
-        [data writeToFile:weakSelfView.pathToPic atomically:YES];
+        [data writeToFile:weakSelf.pathToPic atomically:YES];
         // 存到相册
-        UIImageWriteToSavedPhotosAlbum(processedImage, weakSelfView, @selector(image:didFinishSavingWithError:contextInfo:),(__bridge void *)weakSelfView);
-        result(weakSelfView.pathToPic);
+        UIImageWriteToSavedPhotosAlbum(processedImage, weakSelf, @selector(image:didFinishSavingWithError:contextInfo:),(__bridge void *)weakSelf);
+        result(weakSelf.pathToPic);
     }];
 }
 
@@ -252,11 +276,11 @@
 - (void)takeVideo {
     NSLog(@"开始拍摄");
     unlink([self.pathToMovie UTF8String]);
-    __block CameraFlutterPluginView *weakSelfView = self;
+    __weak __typeof__(self) weakSelf = self;
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [self->_imagefilter addTarget:weakSelfView.movieWriter];
-        weakSelfView.gpuVideoCamera.audioEncodingTarget = weakSelfView.movieWriter;
-        [weakSelfView.movieWriter startRecording];
+        [self->_imagefilter addTarget:weakSelf.movieWriter];
+        weakSelf.gpuVideoCamera.audioEncodingTarget = weakSelf.movieWriter;
+        [weakSelf.movieWriter startRecording];
     });
     
 }
@@ -266,11 +290,11 @@
     
     [_imagefilter removeTarget:self.movieWriter];
     self.gpuVideoCamera.audioEncodingTarget = nil;
-    __block CameraFlutterPluginView *weakSelfView = self;
+    __weak __typeof__(self) weakSelf = self;
     [self.movieWriter finishRecordingWithCompletionHandler:^{
-        [weakSelfView saveVideo];
-        weakSelfView.movieWriter = nil;
-        result(weakSelfView.pathToMovie);
+        [weakSelf saveVideo];
+        weakSelf.movieWriter = nil;
+        result(weakSelf.pathToMovie);
     }];
     
 }
