@@ -79,34 +79,29 @@
     self.nativeView = [[UIView alloc] initWithFrame:_frame];
     self.nativeView.backgroundColor = [UIColor blackColor];
     
+    __weak __typeof__(self) weakSelf = self;
 
     AVAuthorizationStatus videoStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
-    if(videoStatus == AVAuthorizationStatusAuthorized){
-        __weak __typeof__(self) weakSelf = self;
+    if(videoStatus == AVAuthorizationStatusNotDetermined) {
+        [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (granted) {//允许访问
+                    dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC));
+                    dispatch_after(delayTime, dispatch_get_main_queue(), ^{
+                        [weakSelf initCamera];
+                    });
+                }else{ //不允许访问
+                    [weakSelf showCameraAlert];
+                }
+            });
+        }];
+    }else if(videoStatus == AVAuthorizationStatusAuthorized){
         dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC));
         dispatch_after(delayTime, dispatch_get_main_queue(), ^{
             [weakSelf initCamera];
         });
     }else {
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"请开启照相机权限" message:@"打开后可拍摄照片和视频" preferredStyle:UIAlertControllerStyleAlert];
-        NSString *cancel = @"取消";
-        NSString *confirm = @"去开启";
-        [alertController addAction:[UIAlertAction actionWithTitle:cancel style:UIAlertActionStyleCancel handler:^(UIAlertAction *_Nonnull action) {
-        }]];
-        [alertController addAction:[UIAlertAction actionWithTitle:confirm style:UIAlertActionStyleDefault handler:^(UIAlertAction *_Nonnull action) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                NSURL *url = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
-                if ([[UIApplication sharedApplication] canOpenURL:url]) {
-                    [[UIApplication sharedApplication] openURL:url options:[NSDictionary dictionary] completionHandler:^(BOOL success) {
-                    }];
-                }
-            });
-            
-        }]];
-        alertController.modalPresentationStyle = UIModalPresentationFullScreen;
-        
-        FlutterAppDelegate *appDelegate = (FlutterAppDelegate *)[UIApplication sharedApplication].delegate;
-        [appDelegate.window.rootViewController presentViewController:alertController animated:YES completion:nil];
+        [self showCameraAlert];
     }
     
     return self.nativeView;
@@ -408,7 +403,7 @@
     }
 }
 
-//保存视频完成之后的回调
+// 保存视频完成之后的回调
 - (void)video:(NSString *)videoPath didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo {
     if (error) {
         NSLog(@"保存视频失败%@", error.localizedDescription);
@@ -417,9 +412,32 @@
     }
 }
 
-//保存图片完成之后的回调
+// 保存图片完成之后的回调
 - (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo{
     NSLog(@"image = %@, error = %@, contextInfo = %@", image, error, contextInfo);
+}
+
+// 相机权限弹出框
+- (void)showCameraAlert {
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"请开启照相机权限" message:@"打开后可拍摄照片和视频" preferredStyle:UIAlertControllerStyleAlert];
+    NSString *cancel = @"取消";
+    NSString *confirm = @"去开启";
+    [alertController addAction:[UIAlertAction actionWithTitle:cancel style:UIAlertActionStyleCancel handler:^(UIAlertAction *_Nonnull action) {
+    }]];
+    [alertController addAction:[UIAlertAction actionWithTitle:confirm style:UIAlertActionStyleDefault handler:^(UIAlertAction *_Nonnull action) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSURL *url = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+            if ([[UIApplication sharedApplication] canOpenURL:url]) {
+                [[UIApplication sharedApplication] openURL:url options:[NSDictionary dictionary] completionHandler:^(BOOL success) {
+                }];
+            }
+        });
+        
+    }]];
+    alertController.modalPresentationStyle = UIModalPresentationFullScreen;
+    
+    FlutterAppDelegate *appDelegate = (FlutterAppDelegate *)[UIApplication sharedApplication].delegate;
+    [appDelegate.window.rootViewController presentViewController:alertController animated:YES completion:nil];
 }
 
 #pragma mark - Getters & Setters
