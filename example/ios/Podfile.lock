@@ -1,0 +1,25 @@
+PODS:
+  - beauty_cam (1.0.1):
+    - beauty_cam/cge (= 1.0.1)
+    - Flutter
+  - beauty_cam/cge (1.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+
+DEPENDENCIES:
+  - beauty_cam (from `.symlinks/plugins/beauty_cam/ios`)
+  - Flutter (from `Flutter`)
+
+EXTERNAL SOURCES:
+  beauty_cam:
+    :path: ".symlinks/plugins/beauty_cam/ios"
+  Flutter:
+    :path: Flutter
+
+SPEC CHECKSUMS:
+  beauty_cam: 5090a974116ec8c9b2477e0e68c54c7442dedb65
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+
+PODFILE CHECKSUM: 1d859ecc97b37d0cd4ba4ce63fbac09df133a68c
+
+COCOAPODS: 1.12.1

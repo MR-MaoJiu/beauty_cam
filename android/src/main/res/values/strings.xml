@@ -1,0 +1,85 @@
+<resources>
+    <string name="app_name">GPUImageDemo</string>
+
+    <!-- MainActivity-->
+    <string name="main_camera">Camera</string>
+    <string name="main_gallery">Gallery</string>
+    <string name="main_permission_hint">Please Open Permission</string>
+
+    <!-- Common-->
+    <string name="choose_filter">Choose Filter</string>
+
+    <!-- Filter-->
+    <string name="contrast">Contrast</string>
+    <string name="invert">Invert</string>
+    <string name="pixelation">Pixelation</string>
+    <string name="hue">Hue</string>
+    <string name="gamma">Gamma</string>
+    <string name="brightness">Brightness</string>
+    <string name="sepia">Sepia</string>
+    <string name="grayscale">Grayscale</string>
+    <string name="sharpness">Sharpness</string>
+    <string name="sobel_edge_detection">Sobel Edge Detection</string>
+    <string name="convolution_3x3">3x3 Convolution</string>
+    <string name="emboss">Emboss</string>
+    <string name="posterize">Posterize</string>
+    <string name="shold_edge_detection">Shold Edge Detection</string>
+    <string name="saturation">Saturation</string>
+    <string name="exposure">Exposure</string>
+    <string name="highlight_shadow">Highlight Shadow</string>
+    <string name="monochrome">Monochrome</string>
+    <string name="opacity">Opacity</string>
+    <string name="rgb">RGB</string>
+    <string name="white_balance">White Balance</string>
+    <string name="vignette">Vignette</string>
+    <string name="tone_curve">ToneCurve</string>
+    <string name="blend_difference">Blend (Difference)</string>
+    <string name="blend_source_over">Blend (Source Over)</string>
+    <string name="blend_color_burn">Blend (Color Burn)</string>
+    <string name="blend_color_dodge">Blend (Color Dodge)</string>
+    <string name="blend_darken">Blend (Darken)</string>
+    <string name="blend_dissolve">Blend (Dissolve)</string>
+    <string name="blend_exclusion">Blend (Exclusion)</string>
+    <string name="blend_hard_light">Blend (Hard Light)</string>
+    <string name="blend_lighten">Blend (Lighten)</string>
+    <string name="blend_add">Blend (Add)</string>
+    <string name="blend_divide">Blend (Divide)</string>
+    <string name="blend_multiply">Blend (Multiply)</string>
+    <string name="blend_overlay">Blend (Overlay)</string>
+    <string name="blend_screen">Blend (Screen)</string>
+    <string name="blend_alpha">Blend (Alpha)</string>
+    <string name="blend_color">Blend (Color)</string>
+    <string name="blend_hue">Blend (Hue)</string>
+    <string name="blend_saturation">Blend (Saturation)</string>
+    <string name="blend_luminosity">Blend (Luminosity)</string>
+    <string name="blend_linear_burn">Blend (Linear Burn)</string>
+    <string name="blend_soft_light">Blend (Soft Light)</string>
+    <string name="blend_subtract">Blend (Subtract)</string>
+    <string name="blend_chroma_key">Blend (Chroma Key)</string>
+    <string name="blend_normal">Blend (Normal)</string>
+    <string name="lookup_amatorka">Lookup (Amatorka)</string>
+    <string name="gaussian_blur">Gaussian Blur</string>
+    <string name="crosshatch">Crosshatch</string>
+    <string name="box_blur">Box Blur</string>
+    <string name="cga_color_space">CGA Color Space</string>
+    <string name="dilation">Dilation</string>
+    <string name="kuwahara">Kuwahara</string>
+    <string name="rgb_dilation">RGB Dilation</string>
+    <string name="sketch">Sketch</string>
+    <string name="toon">Toon</string>
+    <string name="smooth_toon">Smooth Toon</string>
+    <string name="halftone">Halftone</string>
+    <string name="bulge_distortion">Bulge Distortion</string>
+    <string name="glass_sphere">Glass Sphere</string>
+    <string name="haze">Haze</string>
+    <string name="laplacian">Laplacian</string>
+    <string name="non_maximum_suppression">Non Maximum Suppression</string>
+    <string name="sphere_refraction">Sphere Refraction</string>
+    <string name="swirl">Swirl</string>
+    <string name="weak_pixel_inclusion">Weak Pixel Inclusion</string>
+    <string name="false_color">False Color</string>
+    <string name="color_balance">Color Balance</string>
+    <string name="levels_min_mid_adjust">Levels Min (Mid Adjust)</string>
+    <string name="bilateral_blur">Bilateral Blur</string>
+    <string name="transform_2d">Transform (2-D)</string>
+</resources>
