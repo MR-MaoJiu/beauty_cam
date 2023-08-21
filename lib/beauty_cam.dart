@@ -52,4 +52,9 @@ class BeautyCam {
   Future<String?> setOuPutFilePath(String path) {
     return BeautyCamPlatform.instance.setOuPutFilePath(path);
   }
+
+  ///设置图片纹理加载路径（默认存放在Caches目录）
+  Future<String?> setLoadImageResource(String path) {
+    return BeautyCamPlatform.instance.setLoadImageResource(path);
+  }
 }

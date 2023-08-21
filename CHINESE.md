@@ -37,6 +37,10 @@ cameraFlutterPluginDemo?.takeVideo();
 cameraFlutterPluginDemo?.stopVideo();
 切换镜头：
 cameraFlutterPluginDemo?.switchCamera();
+设置图片纹理加载路径（默认存放在Caches目录）:
+cameraFlutterPluginDemo?.setLoadImageResource();
+设置文件保存路径:
+cameraFlutterPluginDemo?.setLoadImageResource();
 添加滤镜：
 cameraFlutterPluginDemo?. addFilter("@adjust saturation 0 @adjust level 0 0.83921 0.8772");
 ```

@@ -36,8 +36,12 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.platform.PlatformView;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Objects;
 
 public class CameraFlutterPluginView extends CameraRecordGLSurfaceView implements MethodChannel.MethodCallHandler, PlatformView {
@@ -55,28 +59,38 @@ public class CameraFlutterPluginView extends CameraRecordGLSurfaceView implement
     private String beautyConfig="";
     private String  recordFilename="";
     String path=ImageUtil.getPath();
+    String loadImageResource="";
     private CameraRecordGLSurfaceView mCameraView;
     public final static String LOG_TAG = CameraRecordGLSurfaceView.LOG_TAG;
     float level;
     private float mOldDistance;
 
     @SuppressLint({"NewApi", "ClickableViewAccessibility"})
-    public CameraFlutterPluginView(Context context, int viewId, Object args, BinaryMessenger messenger, AttributeSet attrs,AssetManager am) {
+    public CameraFlutterPluginView(Context context, int viewId, Object args, BinaryMessenger messenger, AttributeSet attrs) {
         super(context,attrs);
         //注册
         methodChannel = new MethodChannel(messenger, "beauty_cam");
         methodChannel.setMethodCallHandler(this);
         this.mContext = context;
+
+
+
         CGENativeLibrary.setLoadImageCallback(new CGENativeLibrary.LoadImageCallback() {
             //Notice: the 'name' passed in is just what you write in the rule, e.g: 1.jpg
             //注意， 这里回传的name不包含任何路径名， 仅为具体的图片文件名如 1.jpg
             @Override
             public Bitmap loadImage(String name, Object arg) {
                 Log.i(Common.LOG_TAG, "Loading file: " + name);
-//                AssetManager am = getAssets();
+
                 InputStream is;
                 try {
-                    is = am.open(name);
+
+                    if(loadImageResource==""){
+                        loadImageResource=context.getExternalCacheDir().getPath();
+                        Log.e(TAG,"*******************"+loadImageResource);
+                    }
+                    File file = new File(loadImageResource+"/"+name);
+                    is = new FileInputStream(file);
                 } catch (IOException e) {
                     Log.e(Common.LOG_TAG, "Can not open file " + name);
                     return null;
@@ -274,50 +288,15 @@ public class CameraFlutterPluginView extends CameraRecordGLSurfaceView implement
                  path=methodCall.argument("path");
 
                 break;
+            //设置图片纹理加载路径（默认存放在Caches目录）
+            case "setLoadImageResource":
+                loadImageResource=methodCall.argument("path");
+                break;
             default:
 
                 break;
         }
     }
-
-//    String[] permissions = new String[]{
-//            Manifest.permission.CAMERA,
-//            Manifest.permission.RECORD_AUDIO,
-//            Manifest.permission.WRITE_EXTERNAL_STORAGE
-//    };
-
-
-//    private void checkPermissions(){
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            int i = ContextCompat.checkSelfPermission(getContext(), permissions[0]);
-//            int l = ContextCompat.checkSelfPermission(getContext(), permissions[1]);
-//            int m = ContextCompat.checkSelfPermission(getContext(), permissions[2]);
-//            // 权限是否已经 授权 GRANTED---授权  DINIED---拒绝
-//            if (i != PackageManager.PERMISSION_GRANTED ||
-//                    l != PackageManager.PERMISSION_GRANTED ||
-//                    m != PackageManager.PERMISSION_GRANTED) {
-//                // 如果没有授予该权限，就去提示用户请求
-//                startRequestPermission();
-//            }
-//        }
-//    }
-//    private void startRequestPermission() {
-//        ActivityCompat.requestPermissions(getActivityFromView(this), permissions, 321);
-//    }
-//
-//    public static Activity getActivityFromView(View view) {
-//        if (null != view) {
-//            Context context = view.getContext();
-//            while (context instanceof ContextWrapper) {
-//                if (context instanceof Activity) {
-//                    return (Activity) context;
-//                }
-//                context = ((ContextWrapper) context).getBaseContext();
-//            }
-//        }
-//        return null;
-//    }
-//
 
     @Nullable
     @Override

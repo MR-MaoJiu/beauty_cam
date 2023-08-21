@@ -10,11 +10,10 @@ import io.flutter.plugin.platform.PlatformViewFactory;
 
 public class CameraFlutterPluginViewFactory extends PlatformViewFactory{
     private BinaryMessenger messenger = null;
-    private AssetManager am = null;
-    public CameraFlutterPluginViewFactory(BinaryMessenger messenger,AssetManager am) {
+    public CameraFlutterPluginViewFactory(BinaryMessenger messenger) {
         super(StandardMessageCodec.INSTANCE);
         this.messenger = messenger;
-        this.am = am;
+
     }
 
     /**
@@ -26,6 +25,6 @@ public class CameraFlutterPluginViewFactory extends PlatformViewFactory{
 
     @Override
     public PlatformView create(Context context, int viewId, Object args) {
-        return new CameraFlutterPluginView(context, viewId, args, this.messenger,null,this.am);
+        return new CameraFlutterPluginView(context, viewId, args, this.messenger,null);
     }
 }

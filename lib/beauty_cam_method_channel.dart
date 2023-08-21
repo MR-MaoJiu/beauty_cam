@@ -9,30 +9,12 @@ class MethodChannelBeautyCam extends BeautyCamPlatform {
   @visibleForTesting
   final methodChannel = const MethodChannel('beauty_cam');
 
-  // @override
-  // Future<String?> getPlatformVersion() async {
-  //   final version =
-  //       await methodChannel.invokeMethod<String>('getPlatformVersion');
-  //   return version;
-  // }
+  //TODO：后期直接移值双端接口所有功能通过flutter端实现
   ///切换相机
   @override
   Future<void> switchCamera() {
     return methodChannel.invokeMethod('switchCamera');
   }
-
-  // ///切换滤镜
-  // @override
-  // Future<void> updateFilter(String filterJson) {
-  //   return methodChannel
-  //       .invokeMethod('updateFilter', {"filterJson": filterJson});
-  // }
-  //
-  // ///获取滤镜列表
-  // @override
-  // Future<List<Object?>?> getFilterList() {
-  //   return methodChannel.invokeMethod<List<Object?>>('getFilterList');
-  // }
 
   ///添加滤镜
   @override
@@ -82,5 +64,12 @@ class MethodChannelBeautyCam extends BeautyCamPlatform {
   Future<String?> setOuPutFilePath(String path) {
     return methodChannel
         .invokeMethod<String>('setOuPutFilePath', {"path": path});
+  }
+
+  ///设置图片纹理加载路径（默认存放在Caches目录）
+  @override
+  Future<String?> setLoadImageResource(String path) {
+    return methodChannel
+        .invokeMethod<String>('setLoadImageResource', {"path": path});
   }
 }

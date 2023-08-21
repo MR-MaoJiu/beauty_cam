@@ -17,7 +17,7 @@ Beauty Camera.
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.platform = :ios, '11.0'
+  s.platform = :ios, '17.0'
 
   # v3.5.11
   s.subspec 'cge' do |sp|

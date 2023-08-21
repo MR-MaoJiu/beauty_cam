@@ -5,9 +5,10 @@
 //  Created by MaoJiu on 2023/1/30.
 //
 #import "CameraFlutterPluginView.h"
+#import "BeautyCamPlugin.m"
 #import <cge/cge.h>
 #import <Photos/Photos.h>
-
+#import <cge/cgeUtilFunctions.h>
 
 #define SHOW_FULLSCREEN 0
 #define RECORD_WIDTH 480
@@ -107,28 +108,9 @@
     return self.glkView;
     
 }
-UIImage* loadImageCallback(const char* name, void* arg)
-{
-    NSString* filename = [NSString stringWithUTF8String:name];
-//    NSString *imagePath = [[NSBundle mainBundle] pathForResource:filename ofType:nil];
-//    return [UIImage imageWithContentsOfFile:imagePath];
-    return [UIImage imageNamed:filename];
-    
-    
-//    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"PluginBundle" ofType:@"bundle"];
-//    NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
-//    NSString *imagePath = [bundle pathForResource:filename ofType:nil];
-//    return[UIImage imageWithContentsOfFile:imagePath];
-    
-}
 
-void loadImageOKCallback(UIImage* img, void* arg)
-{
-    
-}
+
 - (void)initCamera {
-    cgeSetLoadImageCallback(loadImageCallback, loadImageOKCallback, nil);
-    
     self.isOpenBeauty = YES;
     self.isSetMoviePath = NO;
     self.isSetPicPath = NO;
@@ -138,7 +120,7 @@ void loadImageOKCallback(UIImage* img, void* arg)
     self.pathToPic = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:[NSString stringWithFormat:@"BeautyCamPic%ld.png", (long)[[NSDate date] timeIntervalSince1970]]];
     
     _myCameraViewHandler = [[CGECameraViewHandler alloc] initWithGLKView:_glkView];
-
+    
     if([_myCameraViewHandler setupCamera: MYAVCaptureSessionPreset(RECORD_HEIGHT, RECORD_WIDTH) cameraPosition:AVCaptureDevicePositionFront isFrontCameraMirrored:YES authorizationFailed:^{
         NSLog(@"Not allowed to open camera and microphone, please choose allow in the 'settings' page!!!");
     }])
@@ -147,11 +129,6 @@ void loadImageOKCallback(UIImage* img, void* arg)
     }
     else
     {
-//        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:@"The Camera Is Not Allowed!"
-//                                                       delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-//        [alert show];
-        
-       
         [self showCameraAlert];
 
     }
@@ -159,11 +136,14 @@ void loadImageOKCallback(UIImage* img, void* arg)
 
     //Set to the max resolution for taking photos.
     [[_myCameraViewHandler cameraRecorder] setPictureHighResolution:YES];
-//
+
+   
     UIPinchGestureRecognizer *pinch = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinch:)];
     
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
     [self.glkView addGestureRecognizer:pinch];
-    
+    [self.glkView addGestureRecognizer:tap];
+   
     // 默认开启美颜
     [self enableBeauty:@"1"];
     
@@ -195,7 +175,11 @@ void loadImageOKCallback(UIImage* img, void* arg)
     }else if ([[call method] isEqualToString:@"setOuPutFilePath"]) { // 设置储存路径
         [self setOuputMP4File:[argumentsDic objectForKey:@"path"]];
         [self setOuputPicFile:[argumentsDic objectForKey:@"path"]];
-    }else if ([[call method] isEqualToString:@"addFilter"]) { // 切换滤镜
+    }else if([[call method] isEqualToString:@"setLoadImageResource"]){//设置图片纹理加载路径（默认存放在Caches目录）
+        loadImageResource=[argumentsDic objectForKey:@"path"];
+    }
+    
+    else if ([[call method] isEqualToString:@"addFilter"]) { // 切换滤镜
         [self setFilterType:[argumentsDic objectForKey:@"filter"]];
     }else if ([[call method] isEqualToString:@"setBeautyLevel"]) { // 切换美颜等级
         [self setBeautyLevel:[NSString stringWithFormat:@"%@", [argumentsDic objectForKey:@"level"]]];
@@ -257,6 +241,9 @@ void loadImageOKCallback(UIImage* img, void* arg)
 // 修改美颜等级
 - (void)setBeautyLevel:(NSString *)level {
     float levelFloat = level.floatValue;
+    float currentIntensity = levelFloat * 3.0f - 1.0f; //[-1, 2]
+    [_myCameraViewHandler setFilterIntensity: currentIntensity];
+    NSLog(@"setBeautyLevel----------------- %f", currentIntensity);
     self.beautyConfig = [NSString stringWithFormat:@"@beautify face %f 480 640", levelFloat];
     [self setFinalFilter];
     
@@ -299,10 +286,6 @@ void loadImageOKCallback(UIImage* img, void* arg)
         [CameraFlutterPluginView saveImage:image toPath:self.pathToPic flutterResult:result];
     }];
     
-//    [_myCameraViewHandler takePicture:^(UIImage* image){
-//        [CameraFlutterPluginView saveImage:image toPath:self.pathToPic flutterResult:result];
-//    } filterConfig:self.filterConfig filterIntensity:1.0f isFrontCameraMirrored:YES];
-//    } filterConfig:"@beautify face 0.5 480 640   @style edge 1 2 " filterIntensity:1.0f isFrontCameraMirrored:YES];
 }
 
 
@@ -313,26 +296,19 @@ void loadImageOKCallback(UIImage* img, void* arg)
     {
         void (^finishBlock)(void) = ^{
             NSLog(@"End recording...\n");
-            
             [CGESharedGLContext mainASyncProcessingQueue:^{
-//                [sender setTitle:@"Rec OK" forState:UIControlStateNormal];
-//                [sender setEnabled:YES];
             }];
             
             [CameraFlutterPluginView saveVideo:[NSURL URLWithString:self.pathToMovie] flutterResult:result];
             
         };
         
-//        [_myCameraViewHandler endRecording:nil];
-//        finishBlock();
         [_myCameraViewHandler endRecording:finishBlock ];
     }
     else
     {
         unlink([self.pathToMovie UTF8String]);
         [_myCameraViewHandler startRecording:[NSURL URLWithString:self.pathToMovie]   size:CGSizeMake(RECORD_WIDTH, RECORD_HEIGHT)];
-//        [sender setTitle:@"Recording" forState:UIControlStateNormal];
-//        [sender setEnabled:YES];
     }
     
 }
@@ -345,8 +321,6 @@ void loadImageOKCallback(UIImage* img, void* arg)
             NSLog(@"End recording...\n");
             
             [CGESharedGLContext mainASyncProcessingQueue:^{
-//                [sender setTitle:@"录制完成" forState:UIControlStateNormal];
-//                [sender setEnabled:YES];
             }];
             
             [CameraFlutterPluginView saveVideo:[NSURL URLWithString:self.pathToMovie] flutterResult:result];
@@ -372,8 +346,6 @@ void loadImageOKCallback(UIImage* img, void* arg)
         NSLog(@"Crop area: %g, %g, %g, %g, record resolution: %g, %g", rt.origin.x, rt.origin.y, rt.size.width, rt.size.height, videoSize.width, videoSize.height);
         
         [_myCameraViewHandler startRecording:[NSURL URLWithString:self.pathToMovie] size:videoSize cropArea:rt];
-//        [sender setTitle:@"Rec stopped" forState:UIControlStateNormal];
-//        [sender setEnabled:YES];
     }
     
 }
@@ -414,10 +386,11 @@ void loadImageOKCallback(UIImage* img, void* arg)
     }];
 }
 
-
 #pragma mark -
 // 缩放/放大
 - (void)pinch:(UIPinchGestureRecognizer *)pinch {
+    
+    
     [_myCameraViewHandler.cameraDevice.inputCamera lockForConfiguration:nil];
     float maxZoomFactor = _myCameraViewHandler.cameraDevice.inputCamera.activeFormat.videoMaxZoomFactor;
     float pinchVelocityDividerFactor = 25.0;
@@ -425,7 +398,56 @@ void loadImageOKCallback(UIImage* img, void* arg)
     _myCameraViewHandler.cameraDevice.inputCamera.videoZoomFactor + atan2(pinch.velocity, pinchVelocityDividerFactor);
     _myCameraViewHandler.cameraDevice.inputCamera.videoZoomFactor = MAX(1.0, MIN(desiredZoomFactor, maxZoomFactor));
     [_myCameraViewHandler.cameraDevice.inputCamera unlockForConfiguration];
+    
+    
+    
 }
+
+
+- (void)tap:(UITapGestureRecognizer *)tap {
+    //对焦
+    CGPoint touchPoint = [tap locationInView:_glkView];
+    CGSize sz = [_glkView frame].size;
+    CGPoint transPoint = CGPointMake(touchPoint.x / sz.width, touchPoint.y / sz.height);
+    
+    [_myCameraViewHandler focusPoint:transPoint];
+    NSLog(@"touch position: %g, %g, transPoint: %g, %g", touchPoint.x, touchPoint.y, transPoint.x, transPoint.y);
+    
+}
+
+
+
+//- (void)downloadImageAndSaveToCaches:(NSURL *)imageURL {
+//    NSURLSession *session = [NSURLSession sharedSession];
+//    NSURLSessionDownloadTask *downloadTask = [session downloadTaskWithURL:imageURL completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
+//        if (error) {
+//            NSLog(@"Error downloading image: %@", error);
+//            return;
+//        }
+//        
+//        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+//        if (httpResponse.statusCode == 200) {
+//            NSString *cachesDirectory = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)[0];
+//            NSString *fileName = [response suggestedFilename];
+//            NSString *destinationPath = [cachesDirectory stringByAppendingPathComponent:fileName];
+//            
+//            NSFileManager *fileManager = [NSFileManager defaultManager];
+//            NSError *moveError = nil;
+//            BOOL success = [fileManager moveItemAtURL:location toURL:[NSURL fileURLWithPath:destinationPath] error:&moveError];
+//            
+//            if (success) {
+//                NSLog(@"Downloaded and saved image to Caches directory");
+//                // Do something with the downloaded image
+//            } else {
+//                NSLog(@"Error moving image to Caches directory: %@", moveError);
+//            }
+//        } else {
+//            NSLog(@"Error downloading image. HTTP status code: %ld", (long)httpResponse.statusCode);
+//        }
+//    }];
+//    
+//    [downloadTask resume];
+//}
 
 @end
 

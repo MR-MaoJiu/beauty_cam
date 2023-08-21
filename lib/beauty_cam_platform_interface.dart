@@ -73,4 +73,10 @@ abstract class BeautyCamPlatform extends PlatformInterface {
   Future<String?> setOuPutFilePath(String path) {
     throw UnimplementedError('setOuPutFilePath() has not been implemented.');
   }
+
+  ///设置图片纹理加载路径（默认存放在Caches目录）
+  Future<String?> setLoadImageResource(String path) {
+    throw UnimplementedError(
+        'setLoadImageResource() has not been implemented.');
+  }
 }

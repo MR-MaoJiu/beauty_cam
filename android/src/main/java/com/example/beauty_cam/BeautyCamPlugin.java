@@ -11,6 +11,8 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 
 /** BeautyCamPlugin */
+
+
 public class BeautyCamPlugin implements FlutterPlugin{
   /// The MethodChannel that will the communication between Flutter and native Android
   ///
@@ -20,8 +22,7 @@ public class BeautyCamPlugin implements FlutterPlugin{
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-    AssetManager am =flutterPluginBinding.getApplicationContext().getAssets();
-    flutterPluginBinding.getPlatformViewRegistry().registerViewFactory("beauty_cam", new CameraFlutterPluginViewFactory(flutterPluginBinding.getBinaryMessenger(),am));
+    flutterPluginBinding.getPlatformViewRegistry().registerViewFactory("beauty_cam", new CameraFlutterPluginViewFactory(flutterPluginBinding.getBinaryMessenger()));
 
   }
 
@@ -30,4 +31,6 @@ public class BeautyCamPlugin implements FlutterPlugin{
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
 //    channel.setMethodCallHandler(null);
   }
+
+  String loadImageResource = "";
 }

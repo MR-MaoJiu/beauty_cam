@@ -233,5 +233,6 @@
 
 ```
 
-* 以上滤镜来自源项目中已配置的滤镜仅供参考不分Android或ios均可使用（ios带.png或.jpg暂时不可用）
-* The above filters are from the configured filters in the source project for reference only, regardless of Android or iOS
+* 以上滤镜来自源项目中已配置的滤镜仅供参考不分Android或ios均可使用（.png或.jpg需要先下载到本地才可以使用，并且保存到本地到名字和使用到名字需要一致，demo中的图片已经放到[assets](Doc%2Fassets)中）
+
+* The above filters are from the configured filters in the source project for reference only, and can be used regardless of Android or ios (. Consistent, the pictures in the demo have been placed in [assets](Doc%2Fassets))

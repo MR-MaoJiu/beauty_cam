@@ -33,7 +33,10 @@ End shooting video:
 cameraFlutterPluginDemo? .stopVideo();
 Switch shots:
 cameraFlutterPluginDemo? .switchCamera();
-
+Set LoadImageResource(Stored in the Caches directory by default):
+cameraFlutterPluginDemo?.setLoadImageResource();
+Set OuPutFilePath:
+cameraFlutterPluginDemo?.setLoadImageResource();
 Add filter: 
 cameraFlutterPluginDemo?. addFilter("@adjust saturation 0 @adjust level 0 0.83921 0.8772");
 ```
