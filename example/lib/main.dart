@@ -195,6 +195,8 @@ class _CameraAppState extends State<CameraApp> {
                       cameraFlutterPluginDemo?.setBeautyLevel(p);
                       if (p > 0) {
                         isEnableBeauty = false;
+                      } else {
+                        isEnableBeauty = true;
                       }
                     });
                   },
@@ -214,6 +216,7 @@ class _CameraAppState extends State<CameraApp> {
                             p = 0.5;
                           }
                           isEnableBeauty = !isEnableBeauty;
+                          cameraFlutterPluginDemo?.setBeautyLevel(p);
                         });
                       },
                       icon: Icon(

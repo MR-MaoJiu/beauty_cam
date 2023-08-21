@@ -251,7 +251,9 @@ public class CameraFlutterPluginView extends CameraRecordGLSurfaceView implement
             //美颜程度（0~100）
             case "setBeautyLevel":
                 level = Float.parseFloat(Objects.requireNonNull(methodCall.argument("level")).toString());
-                beautyConfig="@beautify face "+level+" 480 640 ";
+                float currentIntensity = level * 2.0f - 1.0f; //[-1, 1]
+                mCameraView.setFilterIntensity(currentIntensity);
+                beautyConfig="@beautify face "+currentIntensity+" 480 640 ";
                 mCameraView.setFilterWithConfig(beautyConfig+mCurrentConfig);
 //                mCameraView.setFilterIntensity(level);
                 break;

@@ -241,10 +241,10 @@
 // 修改美颜等级
 - (void)setBeautyLevel:(NSString *)level {
     float levelFloat = level.floatValue;
-    float currentIntensity = levelFloat * 3.0f - 1.0f; //[-1, 2]
+    float currentIntensity = levelFloat * 2.0f - 1.0f; //[-1, 1]
     [_myCameraViewHandler setFilterIntensity: currentIntensity];
     NSLog(@"setBeautyLevel----------------- %f", currentIntensity);
-    self.beautyConfig = [NSString stringWithFormat:@"@beautify face %f 480 640", levelFloat];
+    self.beautyConfig = [NSString stringWithFormat:@"@beautify face %f 480 640", currentIntensity];
     [self setFinalFilter];
     
 }
