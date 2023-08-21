@@ -2,7 +2,10 @@ import 'dart:io';
 
 import 'package:beauty_cam/beauty_cam.dart';
 import 'package:beauty_cam/camera_view.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -136,6 +139,18 @@ class _CameraAppState extends State<CameraApp> {
     "@adjust saturation 0 @adjust level 0 0.83921 0.8772",
     "@adjust hsl 0.02 -0.31 -0.17 @curve R(0, 28)(23, 45)(117, 148)(135, 162)G(0, 8)(131, 152)(255, 255)B(0, 17)(58, 80)(132, 131)(127, 131)(255, 225)"
   ];
+
+  List<String> images = [
+    "filmstock.png",
+    "edgy_amber.png",
+    "foggy_night.png",
+    "hehe.jpg",
+    "late_sunset.png",
+    "logo.png",
+    "mapping0.jpg",
+    "soft_warming.png",
+    "wildbird.png",
+  ];
   late CameraView cameraView;
   String filter = '';
   double p = 0.5;
@@ -152,6 +167,18 @@ class _CameraAppState extends State<CameraApp> {
     return Scaffold(
         appBar: AppBar(
           title: Text(filter.isNotEmpty ? filter : "滤镜Demo"),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  images.forEach((element) {
+                    _saveImg(element);
+                  });
+                },
+                child: const Icon(
+                  Icons.cloud_download,
+                  color: Colors.white,
+                ))
+          ],
         ),
         body: Stack(
           alignment: Alignment.bottomCenter,
@@ -296,5 +323,23 @@ class _CameraAppState extends State<CameraApp> {
 
   void onCameraViewCreated(cameraFlutterPluginDemo) {
     this.cameraFlutterPluginDemo = cameraFlutterPluginDemo;
+  }
+
+  ///保存资源文件
+  void _saveImg(String name) async {
+    if (await Permission.storage.request().isGranted) {
+      var response = await Dio().get(
+          "https://gitee.com/MaoJiuXianSen/beauty_cam/raw/master/Doc/assets/$name",
+          options: Options(responseType: ResponseType.bytes));
+
+      Directory cache = await getApplicationCacheDirectory();
+      File image_file = File('${cache.path}/$name');
+      if (image_file.existsSync()) {
+        print("图片已存在${image_file.path}");
+        return;
+      }
+      //从网络上下载的图片的字节数组写入该文件中。
+      image_file.writeAsBytes(response.data);
+    }
   }
 }

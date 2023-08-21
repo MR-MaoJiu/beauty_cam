@@ -86,7 +86,7 @@ public class CameraFlutterPluginView extends CameraRecordGLSurfaceView implement
                 try {
 
                     if(loadImageResource==""){
-                        loadImageResource=context.getExternalCacheDir().getPath();
+                        loadImageResource=context.getCacheDir().getPath();
                         Log.e(TAG,"*******************"+loadImageResource);
                     }
                     File file = new File(loadImageResource+"/"+name);

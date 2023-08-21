@@ -17,7 +17,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  permission_handler: any
+  path_provider: any
+  dio: any
   beauty_cam:
     # When depending on this package from a real application you should use:
     #   beauty_cam: ^x.y.z
@@ -53,9 +55,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  assets:
-    - assets/
-    - assets/hehe.jpg
+#  assets:
+#    - assets/hehe.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
