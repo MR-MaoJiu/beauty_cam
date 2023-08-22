@@ -226,7 +226,9 @@ class _CameraAppState extends State<CameraApp> {
                     ),
                     IconButton(
                       onPressed: () {
-                        cameraFlutterPluginDemo?.takeVideo();
+                        cameraFlutterPluginDemo?.takeVideo().then((value) {
+                          print("==================>>>>>>>>>>>>>>>>>$value");
+                        });
                       },
                       icon: const Icon(Icons.not_started_outlined,
                           color: Colors.white),

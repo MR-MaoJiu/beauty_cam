@@ -49,7 +49,7 @@ class MethodChannelBeautyCam extends BeautyCamPlatform {
 
   ///开始拍视频
   @override
-  Future<void> takeVideo() {
+  Future<bool?> takeVideo() {
     return methodChannel.invokeMethod('takeVideo');
   }
 

@@ -85,9 +85,8 @@ public class CameraFlutterPluginView extends CameraRecordGLSurfaceView implement
                 InputStream is;
                 try {
 
-                    if(loadImageResource==""){
+                    if(Objects.equals(loadImageResource, "")){
                         loadImageResource=context.getCacheDir().getPath();
-                        Log.e(TAG,"*******************"+loadImageResource);
                     }
                     File file = new File(loadImageResource+"/"+name);
                     is = new FileInputStream(file);
@@ -134,16 +133,13 @@ public class CameraFlutterPluginView extends CameraRecordGLSurfaceView implement
                         final float focusX = event.getX() / mCameraView.getWidth();
                         final float focusY = event.getY() / mCameraView.getHeight();
 
-                        mCameraView.focusAtPoint(focusX, focusY, new Camera.AutoFocusCallback() {
-                            @Override
-                            public void onAutoFocus(boolean success, Camera camera) {
-                                if (success) {
-                                    Log.e(LOG_TAG, String.format("Focus OK, pos: %g, %g", focusX, focusY));
-                                } else {
-                                    Log.e(LOG_TAG, String.format("Focus failed, pos: %g, %g", focusX, focusY));
-                                    mCameraView.cameraInstance().setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+                        mCameraView.focusAtPoint(focusX, focusY, (success, camera) -> {
+                            if (success) {
+                                Log.e(LOG_TAG, String.format("Focus OK, pos: %g, %g", focusX, focusY));
+                            } else {
+                                Log.e(LOG_TAG, String.format("Focus failed, pos: %g, %g", focusX, focusY));
+                                mCameraView.cameraInstance().setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
 
-                                }
                             }
                         });
                     }
@@ -237,7 +233,7 @@ public class CameraFlutterPluginView extends CameraRecordGLSurfaceView implement
             //开启或关闭美颜
             case "enableBeauty":
                Boolean enableBeauty= methodCall.argument("isEnableBeauty");
-               if(enableBeauty){
+               if(Boolean.TRUE.equals(enableBeauty)){
                    beautyConfig="@beautify face "+level+" 480 640 ";
 
                }else{
@@ -255,40 +251,46 @@ public class CameraFlutterPluginView extends CameraRecordGLSurfaceView implement
                 mCameraView.setFilterIntensity(currentIntensity);
                 beautyConfig="@beautify face "+currentIntensity+" 480 640 ";
                 mCameraView.setFilterWithConfig(beautyConfig+mCurrentConfig);
-//                mCameraView.setFilterIntensity(level);
                 break;
             //拍照
             case "takePicture":
                 String image = path + "/beauty_" + System.currentTimeMillis() + ".jpg";
-                mCameraView.takeShot(new CameraRecordGLSurfaceView.TakePictureCallback() {
-                    @Override
-                    public void takePictureOK(Bitmap bmp) {
-                        if (bmp != null) {
-                            ImageUtil.saveBitmap(bmp,image);
-                            bmp.recycle();
-                            result.success(image);
-                        }
+                mCameraView.takeShot(bmp -> {
+                    if (bmp != null) {
+                        ImageUtil.saveBitmap(bmp,image);
+                        bmp.recycle();
+                        result.success(image);
+                    }else{
+                        result.success(null);
                     }
                 });
                 break;
             //录制视频
             case "takeVideo":
                  recordFilename = path + "/beauty_" + System.currentTimeMillis() + ".mp4";
-                mCameraView.startRecording(recordFilename);
+                mCameraView.startRecording(recordFilename, success -> {
+                    if (success) {
+                        Log.e(LOG_TAG,"Start recording OK");
+                        result.success(true);
+                    } else {
+                        Log.e(LOG_TAG,"Start recording failed");
+                        result.success(false);
+                    }
+
+                });
+
+
+
                 break;
             case "stopVideo":
-                mCameraView.endRecording(new CameraRecordGLSurfaceView.EndRecordingCallback() {
-                    @Override
-                    public void endRecordingOK() {
-                        result.success(recordFilename);
-                        recordFilename="";
-                    }
+                mCameraView.endRecording(() -> {
+                    result.success(recordFilename);
+                    recordFilename="";
                 });
                 break;
             //设置文件保存路径
             case "setOuPutFilePath":
                  path=methodCall.argument("path");
-
                 break;
             //设置图片纹理加载路径（默认存放在Caches目录）
             case "setLoadImageResource":

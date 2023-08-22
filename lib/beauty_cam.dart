@@ -39,7 +39,7 @@ class BeautyCam {
   }
 
   ///开始拍视频
-  Future<void> takeVideo() {
+  Future<bool?> takeVideo() {
     return BeautyCamPlatform.instance.takeVideo();
   }
 

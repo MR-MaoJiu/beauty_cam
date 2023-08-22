@@ -68,8 +68,8 @@ dependencies {
     compileOnly files("$flutterRoot/bin/cache/artifacts/engine/android-arm/flutter.jar")
 //    implementation 'com.github.MR-MaoJiu:android-gpuimage:1.8'
 //    implementation files('libs/gpuimage.jar')
-//    implementation 'org.wysaid:gpuimage-plus:2.6.3'
-    implementation 'org.wysaid:gpuimage-plus:3.0.0-min'
+    implementation 'org.wysaid:gpuimage-plus:2.6.3'
+//    implementation 'org.wysaid:gpuimage-plus:3.0.0-min'
 //    implementation 'jp.co.cyberagent.android:gpuimage:2.0.4'
     implementation 'androidx.appcompat:appcompat:1.4.1'
 }
