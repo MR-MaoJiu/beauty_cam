@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:beauty_cam/beauty_cam.dart';
 import 'package:beauty_cam/camera_view.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -24,7 +26,6 @@ class CameraApp extends StatefulWidget {
 class _CameraAppState extends State<CameraApp> {
   ///定义一个测试类的属性 用来调用原生方法 和原生交互
   BeautyCam? cameraFlutterPluginDemo; // 定一个插件的对象，
-  bool isEnableBeauty = true;
   List<String> filters = [
     "",
     "@dynamic motionflow 12 0",
@@ -139,7 +140,6 @@ class _CameraAppState extends State<CameraApp> {
     "@adjust saturation 0 @adjust level 0 0.83921 0.8772",
     "@adjust hsl 0.02 -0.31 -0.17 @curve R(0, 28)(23, 45)(117, 148)(135, 162)G(0, 8)(131, 152)(255, 255)B(0, 17)(58, 80)(132, 131)(127, 131)(255, 225)"
   ];
-
   List<String> images = [
     "filmstock.png",
     "edgy_amber.png",
@@ -151,6 +151,13 @@ class _CameraAppState extends State<CameraApp> {
     "soft_warming.png",
     "wildbird.png",
   ];
+  var isRecording = false;
+  bool isTakeVideo = true;
+  int recordingSeconds = 0;
+  int maxRecordingSeconds = 300;
+  Timer? _timer;
+  bool isEnableBeauty = true;
+  double level = 1;
   late CameraView cameraView;
   String filter = '';
   double p = 0.5;
@@ -170,13 +177,13 @@ class _CameraAppState extends State<CameraApp> {
           actions: [
             TextButton(
                 onPressed: () {
-                  images.forEach((element) {
+                  for (var element in images) {
                     _saveImg(element);
-                  });
+                  }
                 },
-                child: const Icon(
-                  Icons.cloud_download,
-                  color: Colors.white,
+                child: const Text(
+                  "下载所需资源",
+                  style: TextStyle(color: Colors.white),
                 ))
           ],
         ),
@@ -184,150 +191,248 @@ class _CameraAppState extends State<CameraApp> {
           alignment: Alignment.bottomCenter,
           children: <Widget>[
             cameraView,
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Slider(
-                  value: p,
-                  onChanged: (double value) {
-                    setState(() {
-                      p = value;
-                      cameraFlutterPluginDemo?.setBeautyLevel(p);
-                      if (p > 0) {
-                        isEnableBeauty = false;
-                      } else {
-                        isEnableBeauty = true;
-                      }
-                    });
-                  },
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    ///添加按钮 用来触发原生调用
-                    IconButton(
-                      onPressed: () {
-                        cameraFlutterPluginDemo?.enableBeauty(isEnableBeauty);
 
-                        setState(() {
-                          if (!isEnableBeauty) {
-                            p = 0;
-                          } else {
-                            p = 0.5;
-                          }
-                          isEnableBeauty = !isEnableBeauty;
-                          cameraFlutterPluginDemo?.setBeautyLevel(p);
-                        });
-                      },
+            ///控制面板
+            Positioned(
+                top: 30,
+                right: 20,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      onPressed: () => showBeautyBottomSheet(),
                       icon: Icon(
                         isEnableBeauty ? Icons.face : Icons.face_retouching_off,
                         color: Colors.white,
+                        size: 30,
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        cameraFlutterPluginDemo?.takeVideo().then((value) {
-                          print("==================>>>>>>>>>>>>>>>>>$value");
-                        });
-                      },
-                      icon: const Icon(Icons.not_started_outlined,
-                          color: Colors.white),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        // cameraFlutterPluginDemo?.updateFilter("isEnableBeauty");
-                        //
-                        // setState(() {
-                        //   isEnableBeauty = !isEnableBeauty;
-                        // });
-                        cameraFlutterPluginDemo?.stopVideo().then((value) {
-                          print(
-                              "================================================");
-                          print("$value");
-                          print(
-                              "================================================");
-                          // final snackBar = SnackBar(content: Text('$value'));
-                          // ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        });
-                      },
-                      icon: const Icon(Icons.stop, color: Colors.white),
                     ),
                     IconButton(
                       onPressed: () {
                         cameraFlutterPluginDemo?.switchCamera();
                       },
-                      icon:
-                          const Icon(Icons.switch_camera, color: Colors.white),
+                      icon: const Icon(
+                        CupertinoIcons.switch_camera,
+                        color: Colors.white,
+                        size: 30,
+                      ),
                     ),
                     IconButton(
                       onPressed: () {
                         _showFilterDialog(context);
                       },
-                      icon:
-                          const Icon(Icons.list_alt_sharp, color: Colors.white),
+                      icon: const Icon(
+                        CupertinoIcons.list_bullet,
+                        color: Colors.white,
+                        size: 30,
+                      ),
                     ),
-                    IconButton(
-                      onPressed: () {
-                        cameraFlutterPluginDemo?.takePicture().then((value) {
-                          print("====================>>>>>>>>$value");
-                          showDialog(
-                              context: context,
-                              builder: (context) {
-                                return GestureDetector(
-                                  child: Image.file(File(value!)),
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                  },
-                                );
-                              });
-                        });
-                      },
-                      icon: const Icon(Icons.add_a_photo, color: Colors.white),
+                  ],
+                )),
+
+            ///录制⏺️
+            Positioned(
+              bottom: 50,
+              left: 20,
+              right: 20,
+              child: GestureDetector(
+                child: Icon(
+                  isRecording
+                      ? CupertinoIcons.stop_fill
+                      : CupertinoIcons.circle_fill,
+                  color: Colors.white,
+                  size: 80,
+                ),
+                onTap: () {
+                  isTakeVideo
+                      ? isRecording
+                          ? stopVideoRecording()
+                          : startVideoRecording()
+                      : takePhoto();
+                },
+              ),
+            ),
+
+            ///选择
+            Positioned(
+              bottom: 30,
+              left: 20,
+              right: 20,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: isTakeVideo ? 50 : 0,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        isTakeVideo = true;
+                      });
+                    },
+                    child: const Text(
+                      "拍视频",
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ),
+                  Container(
+                    width: 20,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        if (isRecording) {
+                          stopVideoRecording();
+                        }
+                        isRecording = false;
+                        isTakeVideo = false;
+                      });
+                    },
+                    child: const Text(
+                      "拍照片",
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ),
+                  Container(
+                    width: isTakeVideo ? 0 : 50,
+                  ),
+                ],
+              ),
+            ),
+
+            ///选择点
+            Positioned(
+              bottom: 25,
+              child: SizedBox(
+                width: 16,
+                height: 2,
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(1)),
+                  width: 16,
+                  height: 2,
+                ),
+              ),
+              // left: 20,
+              // right: 20,
+            ),
+
+            ///录制进度条
+            if (isRecording)
+              Positioned(
+                top: 20,
+                left: 5,
+                right: 5,
+                child: LinearProgressIndicator(
+                  value: recordingSeconds / maxRecordingSeconds,
+                  valueColor: const AlwaysStoppedAnimation(
+                      Color.fromRGBO(0, 215, 120, 1)),
+                  backgroundColor: Colors.white,
+                ),
+              ),
+
+            ///录制计时点
+            if (isRecording)
+              Positioned(
+                bottom: 150,
+                left: 0,
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.fiber_manual_record,
+                      size: 5,
+                      color: Colors.red,
+                    ),
+                    Text(
+                      " $recordingSeconds S",
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
                     )
                   ],
                 ),
-              ],
-            )
+              ),
           ],
         ));
   }
 
-  void _showFilterDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Select Filter'),
-          content: Container(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: filters.length,
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                  title: Text(filters[index]),
-                  onTap: () {
-                    Navigator.of(context).pop(filters[index]);
-                  },
-                );
-              },
-            ),
-          ),
-        );
-      },
-    ).then((selectedFilter) {
-      if (selectedFilter != null) {
-        // Do something with the selected filter
-        cameraFlutterPluginDemo?.addFilter(selectedFilter);
-        setState(() {
-          filter = selectedFilter;
-        });
+  /// 录制视频
+  Future<void> startVideoRecording() async {
+    /// 这里为我统计的录制时长
+
+    if (isRecording) {
+      return;
+
+      /// 如果正在录制则无效
+    }
+    setState(() {
+      isRecording = true;
+      recordingSeconds = 0;
+    });
+
+    startCountdownTimer();
+    await cameraFlutterPluginDemo?.takeVideo();
+  }
+
+  /// 停止录制
+  Future<void> stopVideoRecording() async {
+    if (!isRecording) {
+      return;
+    }
+    if (recordingSeconds > 1) {
+      setState(() {
+        isRecording = false;
+      });
+
+      print(
+          "=======================================================停止录制$recordingSeconds");
+      await cameraFlutterPluginDemo?.stopVideo();
+    }
+  }
+
+  ///  统计的录制时长
+  void startCountdownTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (time) {
+      {
+        if (mounted) {
+          setState(() {
+            //录制时间最多不可以大于widget.maxRecordingSeconds但至少要比bgm长+1是为了去误差
+            if (recordingSeconds + 1 == maxRecordingSeconds) {
+              _timer?.cancel();
+              stopVideoRecording();
+            } else {
+              recordingSeconds++;
+              print(">>>>>>>>>>>>>>>>>>>>>>>>$recordingSeconds=${time.tick}");
+            }
+          });
+        }
       }
     });
   }
 
-  void onCameraViewCreated(cameraFlutterPluginDemo) {
-    this.cameraFlutterPluginDemo = cameraFlutterPluginDemo;
+  ///拍图片
+  takePhoto() async {
+    try {
+      if (isRecording) {
+        stopVideoRecording();
+      }
+      cameraFlutterPluginDemo?.takePicture().then((value) {
+        print("====================>>>>>>>>$value");
+        showDialog(
+            context: context,
+            builder: (context) {
+              return GestureDetector(
+                child: Image.file(File(value!)),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              );
+            });
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   ///保存资源文件
@@ -346,5 +451,115 @@ class _CameraAppState extends State<CameraApp> {
       //从网络上下载的图片的字节数组写入该文件中。
       image_file.writeAsBytes(response.data);
     }
+  }
+
+  ///滤镜选择弹窗
+  void _showFilterDialog(BuildContext context) {
+    showModalBottomSheet(
+      backgroundColor: Colors.transparent,
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(
+              color: Colors.black26, borderRadius: BorderRadius.circular(8)),
+          padding: const EdgeInsets.only(top: 15, bottom: 15),
+          height: 150,
+          child: CupertinoPicker(
+              itemExtent: 50, //行高
+              onSelectedItemChanged: (index) {
+                cameraFlutterPluginDemo?.addFilter(filters[index]);
+                setState(() {
+                  filter = filters[index];
+                });
+              },
+              children: List<Widget>.generate(filters.length, (int index) {
+                return Center(
+                  child: Text(
+                    filters[index],
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                );
+              })),
+        );
+      },
+    );
+  }
+
+  ///美颜弹窗
+  showBeautyBottomSheet() {
+    print("====================>>>>>");
+    showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (_) => StatefulBuilder(builder: (BuildContext context,
+                void Function(void Function()) setState) {
+              return Container(
+                decoration: BoxDecoration(
+                    color: Colors.black26,
+                    borderRadius: BorderRadius.circular(8)),
+                padding: const EdgeInsets.only(top: 15, bottom: 15),
+                height: 150,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CupertinoSwitch(
+                            value: isEnableBeauty,
+                            onChanged: (v) {
+                              setState(() {
+                                isEnableBeauty = v;
+                                if (isEnableBeauty) {
+                                  level = 1;
+                                } else {
+                                  level = 0;
+                                }
+                              });
+                              cameraFlutterPluginDemo
+                                  ?.enableBeauty(isEnableBeauty);
+                            },
+                          ),
+                          Text(isEnableBeauty ? "开启" : "关闭",
+                              style: const TextStyle(color: Colors.white))
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 8,
+                      child: Slider(
+                        value: level,
+                        label: '${(level * 100).toInt()}%',
+                        divisions: 100,
+                        onChanged: (v) {
+                          setState(() {
+                            level = v;
+                            if (level == 0) {
+                              isEnableBeauty = false;
+                              cameraFlutterPluginDemo
+                                  ?.enableBeauty(isEnableBeauty);
+                            } else {
+                              isEnableBeauty = true;
+                              cameraFlutterPluginDemo
+                                  ?.enableBeauty(isEnableBeauty);
+                            }
+                          });
+
+                          cameraFlutterPluginDemo?.setBeautyLevel(level);
+                        },
+                        max: 1,
+                        min: 0,
+                      ),
+                    )
+                  ],
+                ),
+              );
+            }));
+  }
+
+  void onCameraViewCreated(cameraFlutterPluginDemo) {
+    this.cameraFlutterPluginDemo = cameraFlutterPluginDemo;
   }
 }
