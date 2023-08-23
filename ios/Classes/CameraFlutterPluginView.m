@@ -8,7 +8,6 @@
 #import "BeautyCamPlugin.h"
 #import <cge/cge.h>
 #import <Photos/Photos.h>
-#import <cge/cgeUtilFunctions.h>
 
 #define SHOW_FULLSCREEN 0
 #define RECORD_WIDTH 480
