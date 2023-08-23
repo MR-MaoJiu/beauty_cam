@@ -15,6 +15,7 @@
 
 #define _MYAVCaptureSessionPreset(w, h) AVCaptureSessionPreset ## w ## x ## h
 #define MYAVCaptureSessionPreset(w, h) _MYAVCaptureSessionPreset(w, h)
+NSString* loadImageResource;
 @interface CameraFlutterPluginView ()
 /** channel*/
 @property (nonatomic, strong)  FlutterMethodChannel  *channel;

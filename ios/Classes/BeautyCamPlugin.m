@@ -3,13 +3,15 @@
 #import <cge/cge.h>
 
 
-
+NSString* loadImageResource;
 UIImage* loadImageCallback(const char* name, void* arg)
 {
 //    NSString* filename = [NSString stringWithUTF8String:name];
 //    return [UIImage imageNamed:filename];
 //
         NSString* fileName = [NSString stringWithUTF8String:name];
+        BeautyCamPlugin *beautyCamPlugin = [[BeautyCamPlugin alloc] init];
+        
         if(loadImageResource==nil){
             NSArray* paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
             loadImageResource= [paths objectAtIndex:0];
