@@ -2,7 +2,7 @@
 #import "CameraFlutterPluginViewFactory.h"
 #import <cge/cge.h>
 
-NSString* loadImageResource;
+
 
 UIImage* loadImageCallback(const char* name, void* arg)
 {

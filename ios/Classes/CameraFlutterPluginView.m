@@ -5,7 +5,7 @@
 //  Created by MaoJiu on 2023/1/30.
 //
 #import "CameraFlutterPluginView.h"
-#import "BeautyCamPlugin.m"
+#import "BeautyCamPlugin.h"
 #import <cge/cge.h>
 #import <Photos/Photos.h>
 #import <cge/cgeUtilFunctions.h>

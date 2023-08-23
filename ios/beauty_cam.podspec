@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'beauty_cam'
-  s.version          = '1.0.1'
+  s.version          = '1.0.3'
   s.summary          = 'Beauty Camera.'
   s.description      = <<-DESC
 Beauty Camera.
