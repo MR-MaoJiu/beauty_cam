@@ -310,6 +310,10 @@ public class CameraFlutterPluginView extends CameraRecordGLSurfaceView implement
 
     @Override
     public void dispose() {
+        mCameraView.release(null);
+        mCameraView.onPause();
 
     }
+
+
 }
