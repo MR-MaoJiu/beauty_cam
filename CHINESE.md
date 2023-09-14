@@ -40,10 +40,10 @@ cameraFlutterPluginDemo?.switchCamera();
 设置图片纹理加载路径（默认存放在Caches目录）:
 cameraFlutterPluginDemo?.setLoadImageResource();
 设置文件保存路径:
-cameraFlutterPluginDemo?.setLoadImageResource();
+cameraFlutterPluginDemo?.setOuPutFilePath();
 添加滤镜：
 cameraFlutterPluginDemo?. addFilter("@adjust saturation 0 @adjust level 0 0.83921 0.8772");
 ```
-![beauty1.jpeg](Doc%2Fbeauty1.jpeg)
+![beauty1.jpg](Doc%2Fbeauty1.jpg)
 ![beauty2.jpg](Doc%2Fbeauty2.jpg)
 [beauty.mp4](Doc%2Fbeauty.mp4)

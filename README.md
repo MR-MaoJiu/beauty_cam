@@ -36,10 +36,10 @@ cameraFlutterPluginDemo? .switchCamera();
 Set LoadImageResource(Stored in the Caches directory by default):
 cameraFlutterPluginDemo?.setLoadImageResource();
 Set OuPutFilePath:
-cameraFlutterPluginDemo?.setLoadImageResource();
+cameraFlutterPluginDemo?.setOuPutFilePath();
 Add filter: 
 cameraFlutterPluginDemo?. addFilter("@adjust saturation 0 @adjust level 0 0.83921 0.8772");
 ```
-![beauty1.jpeg](Doc%2Fbeauty1.jpeg)
+![beauty1.jpg](Doc%2Fbeauty1.jpg)
 ![beauty2.jpg](Doc%2Fbeauty2.jpg)
 [beauty.mp4](Doc%2Fbeauty.mp4)
