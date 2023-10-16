@@ -47,3 +47,6 @@ cameraFlutterPluginDemo?. addFilter("@adjust saturation 0 @adjust level 0 0.8392
 ![beauty1.jpg](Doc%2Fbeauty1.jpg)
 ![beauty2.jpg](Doc%2Fbeauty2.jpg)
 [beauty.mp4](Doc%2Fbeauty.mp4)
+
+* 如果您觉得对您有用的话请给个star或者打赏一下，您的激励会使我更加有动力！！！
+* ![img.png](Doc%2Fimg.png)

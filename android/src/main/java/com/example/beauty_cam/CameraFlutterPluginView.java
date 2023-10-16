@@ -17,6 +17,9 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+
 import androidx.annotation.NonNull;
 
 import androidx.annotation.Nullable;
@@ -72,9 +75,6 @@ public class CameraFlutterPluginView extends CameraRecordGLSurfaceView implement
         methodChannel = new MethodChannel(messenger, "beauty_cam");
         methodChannel.setMethodCallHandler(this);
         this.mContext = context;
-
-
-
         CGENativeLibrary.setLoadImageCallback(new CGENativeLibrary.LoadImageCallback() {
             //Notice: the 'name' passed in is just what you write in the rule, e.g: 1.jpg
             //注意， 这里回传的name不包含任何路径名， 仅为具体的图片文件名如 1.jpg
@@ -107,7 +107,9 @@ public class CameraFlutterPluginView extends CameraRecordGLSurfaceView implement
                 bmp.recycle();
             }
         }, null);
+
         mCameraView =this;
+        mCameraView.setFitFullView(true);
         mCameraView.presetCameraForward(false);
         mCameraView.presetRecordingSize(1080, 1920);
         //Taking picture size.
@@ -286,7 +288,7 @@ public class CameraFlutterPluginView extends CameraRecordGLSurfaceView implement
                 mCameraView.endRecording(() -> {
                     result.success(recordFilename);
                     recordFilename="";
-                });
+                },true);
                 break;
             //设置文件保存路径
             case "setOuPutFilePath":

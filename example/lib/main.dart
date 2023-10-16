@@ -172,189 +172,212 @@ class _CameraAppState extends State<CameraApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(filter.isNotEmpty ? filter : "滤镜Demo"),
-          actions: [
-            TextButton(
-                onPressed: () {
-                  for (var element in images) {
-                    _saveImg(element);
-                  }
+        // appBar: AppBar(
+        //   title: Text(filter.isNotEmpty ? filter : "滤镜Demo"),
+        //   actions: [
+        //     TextButton(
+        //         onPressed: () {
+        //           for (var element in images) {
+        //             _saveImg(element);
+        //           }
+        //         },
+        //         child: const Text(
+        //           "下载所需资源",
+        //           style: TextStyle(color: Colors.white),
+        //         ))
+        //   ],
+        // ),
+        body: Stack(
+      alignment: Alignment.bottomCenter,
+      children: <Widget>[
+        cameraView,
+
+        ///控制面板
+        Positioned(
+            top: 60,
+            right: 20,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  onPressed: () => showBeautyBottomSheet(),
+                  icon: Icon(
+                    isEnableBeauty ? Icons.face : Icons.face_retouching_off,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    cameraFlutterPluginDemo?.switchCamera();
+                  },
+                  icon: const Icon(
+                    CupertinoIcons.switch_camera,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    _showFilterDialog(context);
+                  },
+                  icon: const Icon(
+                    CupertinoIcons.list_bullet,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+              ],
+            )),
+
+        ///录制⏺️
+        Positioned(
+          bottom: 50,
+          left: 20,
+          right: 20,
+          child: GestureDetector(
+            child: Icon(
+              isRecording
+                  ? CupertinoIcons.stop_fill
+                  : CupertinoIcons.circle_fill,
+              color: Colors.white,
+              size: 80,
+            ),
+            onTap: () {
+              isTakeVideo
+                  ? isRecording
+                      ? stopVideoRecording()
+                      : startVideoRecording()
+                  : takePhoto();
+            },
+          ),
+        ),
+
+        ///选择
+        Positioned(
+          bottom: 30,
+          left: 20,
+          right: 20,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: isTakeVideo ? 50 : 0,
+              ),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isTakeVideo = true;
+                  });
                 },
                 child: const Text(
-                  "下载所需资源",
-                  style: TextStyle(color: Colors.white),
-                ))
-          ],
-        ),
-        body: Stack(
-          alignment: Alignment.bottomCenter,
-          children: <Widget>[
-            cameraView,
-
-            ///控制面板
-            Positioned(
-                top: 30,
-                right: 20,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      onPressed: () => showBeautyBottomSheet(),
-                      icon: Icon(
-                        isEnableBeauty ? Icons.face : Icons.face_retouching_off,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        cameraFlutterPluginDemo?.switchCamera();
-                      },
-                      icon: const Icon(
-                        CupertinoIcons.switch_camera,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        _showFilterDialog(context);
-                      },
-                      icon: const Icon(
-                        CupertinoIcons.list_bullet,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                    ),
-                  ],
-                )),
-
-            ///录制⏺️
-            Positioned(
-              bottom: 50,
-              left: 20,
-              right: 20,
-              child: GestureDetector(
-                child: Icon(
-                  isRecording
-                      ? CupertinoIcons.stop_fill
-                      : CupertinoIcons.circle_fill,
-                  color: Colors.white,
-                  size: 80,
+                  "拍视频",
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
+              ),
+              Container(
+                width: 20,
+              ),
+              GestureDetector(
                 onTap: () {
-                  isTakeVideo
-                      ? isRecording
-                          ? stopVideoRecording()
-                          : startVideoRecording()
-                      : takePhoto();
+                  setState(() {
+                    if (isRecording) {
+                      stopVideoRecording();
+                    }
+                    isRecording = false;
+                    isTakeVideo = false;
+                  });
                 },
-              ),
-            ),
-
-            ///选择
-            Positioned(
-              bottom: 30,
-              left: 20,
-              right: 20,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: isTakeVideo ? 50 : 0,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isTakeVideo = true;
-                      });
-                    },
-                    child: const Text(
-                      "拍视频",
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ),
-                  Container(
-                    width: 20,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        if (isRecording) {
-                          stopVideoRecording();
-                        }
-                        isRecording = false;
-                        isTakeVideo = false;
-                      });
-                    },
-                    child: const Text(
-                      "拍照片",
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ),
-                  Container(
-                    width: isTakeVideo ? 0 : 50,
-                  ),
-                ],
-              ),
-            ),
-
-            ///选择点
-            Positioned(
-              bottom: 25,
-              child: SizedBox(
-                width: 16,
-                height: 2,
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(1)),
-                  width: 16,
-                  height: 2,
+                child: const Text(
+                  "拍照片",
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
-              // left: 20,
-              // right: 20,
+              Container(
+                width: isTakeVideo ? 0 : 50,
+              ),
+            ],
+          ),
+        ),
+
+        ///选择点
+        Positioned(
+          bottom: 25,
+          child: SizedBox(
+            width: 16,
+            height: 2,
+            child: Container(
+              decoration: BoxDecoration(
+                  color: Colors.white, borderRadius: BorderRadius.circular(1)),
+              width: 16,
+              height: 2,
             ),
+          ),
+          // left: 20,
+          // right: 20,
+        ),
 
-            ///录制进度条
-            if (isRecording)
-              Positioned(
-                top: 20,
-                left: 5,
-                right: 5,
-                child: LinearProgressIndicator(
-                  value: recordingSeconds / maxRecordingSeconds,
-                  valueColor: const AlwaysStoppedAnimation(
-                      Color.fromRGBO(0, 215, 120, 1)),
-                  backgroundColor: Colors.white,
-                ),
-              ),
+        ///录制进度条
+        if (isRecording)
+          Positioned(
+            top: 20,
+            left: 5,
+            right: 5,
+            child: LinearProgressIndicator(
+              value: recordingSeconds / maxRecordingSeconds,
+              valueColor:
+                  const AlwaysStoppedAnimation(Color.fromRGBO(0, 215, 120, 1)),
+              backgroundColor: Colors.white,
+            ),
+          ),
 
-            ///录制计时点
-            if (isRecording)
-              Positioned(
-                bottom: 150,
-                left: 0,
-                right: 0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.fiber_manual_record,
-                      size: 5,
-                      color: Colors.red,
-                    ),
-                    Text(
-                      " $recordingSeconds S",
-                      style: const TextStyle(color: Colors.white, fontSize: 10),
-                    )
-                  ],
+        ///录制计时点
+        if (isRecording)
+          Positioned(
+            bottom: 150,
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.fiber_manual_record,
+                  size: 5,
+                  color: Colors.red,
                 ),
+                Text(
+                  " $recordingSeconds S",
+                  style: const TextStyle(color: Colors.white, fontSize: 10),
+                )
+              ],
+            ),
+          ),
+        Positioned(
+          top: 25,
+          left: 8,
+          right: 8,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                filter.isNotEmpty ? filter : "滤镜Demo",
+                style: const TextStyle(color: Colors.white),
               ),
-          ],
-        ));
+              TextButton(
+                  onPressed: () {
+                    for (var element in images) {
+                      _saveImg(element);
+                    }
+                  },
+                  child: const Text(
+                    "下载所需资源",
+                    style: TextStyle(color: Colors.white),
+                  )),
+            ],
+          ),
+        ),
+      ],
+    ));
   }
 
   /// 录制视频
@@ -388,6 +411,7 @@ class _CameraAppState extends State<CameraApp> {
       print(
           "=======================================================停止录制$recordingSeconds");
       await cameraFlutterPluginDemo?.stopVideo();
+      _timer?.cancel();
     }
   }
 
