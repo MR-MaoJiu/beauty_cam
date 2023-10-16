@@ -1,5 +1,5 @@
 name: beauty_cam
-description: beauty_cam.
+description: beauty_cam is a plugin that allows you to set beauty and filters, and it supports remote download of filters as well as custom filters（是一个可以设置美颜和滤镜的插件，它支持远程下载滤镜以及自定义滤镜）
 version: 1.0.5
 homepage: https://github.com/MR-MaoJiu/beauty_cam
 
