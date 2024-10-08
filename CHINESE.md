@@ -50,3 +50,5 @@ cameraFlutterPluginDemo?. addFilter("@adjust saturation 0 @adjust level 0 0.8392
 
 * 如果您觉得对您有用的话请给个star或者打赏一下，您的激励会使我更加有动力！！！
 * ![img.png](Doc%2Fimg.png)
+* 技术交流群
+* ![IMG_1849](https://github.com/user-attachments/assets/09fe65fb-f32c-4eca-bd96-2e0c762c205e)
